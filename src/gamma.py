@@ -4,9 +4,10 @@
 
 from manim import *
 import numpy as np
+from scipy.special import gamma
 
 
-WAIT_TIME = 0.3
+WAIT_TIME = 0.7
 
 
 
@@ -16,6 +17,9 @@ def get_exp(i):
 
 def get_exp_label(i):
     return 'x^{' + str(i) + "-1} e^{-x}"
+
+def get_exp_label(i):
+    return "\Gamma({:.1f}) = {:.1f}".format(i, gamma(i))
 
 
 
@@ -32,7 +36,8 @@ class CreateGraph(Scene):
         num_iter = 10
         range_graps = np.linspace(first_g, last_g, num=num_iter)
         graphs = [axes.get_graph(get_exp(i), color=WHITE) for i in range_graps]
-        desc = [MathTex(get_exp_label(np.round(i,2))) for i in range_graps]
+        areas =  [axes.get_area(g, x_range=[0.0, 15], dx_scaling=50, color=BLUE) for g in graphs]
+        desc = [MathTex(get_exp_label(i)) for i in range_graps]
 
         title = Tex(r"Gamma Function")
         self.play(Write(title))
@@ -44,11 +49,13 @@ class CreateGraph(Scene):
         self.play(Create(axes))
         self.wait()
         self.play(Create(graphs[0]))
+        self.play(Create(areas[0]))
         self.wait(WAIT_TIME)
         desc[1].to_corner(UP + LEFT)
         self.play(FadeOut(title),
                   Transform(desc[0], desc[1]),
-                  Transform(graphs[0], graphs[0+1]))
+                  Transform(graphs[0], graphs[1]),
+                  Transform(areas[0], areas[1]))
         self.wait(WAIT_TIME)
 
         for i in range(len(graphs)+3):
@@ -58,8 +65,11 @@ class CreateGraph(Scene):
                 comands = [FadeOut(desc[i]),
                            Transform(desc[i+1], desc[i+2]),
                            FadeOut(graphs[i]),
-                           Transform(graphs[i+1], graphs[i+2])]
+                           Transform(graphs[i+1], graphs[i+2]),
+                           FadeOut(areas[i]),
+                           Transform(areas[i+1], areas[i+2])]
                 self.play(*comands)
                 self.wait(WAIT_TIME)
             except IndexError:
                 pass
+        self.wait(WAIT_TIME*3)
