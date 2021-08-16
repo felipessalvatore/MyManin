@@ -7,7 +7,7 @@ import numpy as np
 from scipy.special import gamma
 
 
-WAIT_TIME = 0.7
+WAIT_TIME = 1.0
 
 
 
@@ -33,18 +33,25 @@ class CreateGraph(Scene):
 
         first_g = 4
         last_g = 6
-        num_iter = 10
+        num_iter = 5
         range_graps = np.linspace(first_g, last_g, num=num_iter)
         graphs = [axes.get_graph(get_exp(i), color=WHITE) for i in range_graps]
         areas =  [axes.get_area(g, x_range=[0.0, 15], dx_scaling=50, color=BLUE) for g in graphs]
         desc = [MathTex(get_exp_label(i)) for i in range_graps]
 
-        title = Tex(r"Gamma Function")
-        self.play(Write(title))
-        self.wait()
+        title = Tex(r"The Gamma Function")
+        basel = MathTex(r"\Gamma (z)=\int _{0}^{\infty }x^{z-1}e^{-x}\,dx")
+
+        VGroup(title, basel).arrange(DOWN)
+        self.play(
+            Write(title),
+            FadeIn(basel, shift=DOWN),
+        )
+        self.wait(2)
         desc[0].to_corner(UP + LEFT)
         self.play(
-            Transform(title, desc[0]))
+            Transform(title, desc[0]),
+            LaggedStart(*[FadeOut(obj, shift=DOWN) for obj in basel]))
         self.wait()
         self.play(Create(axes))
         self.wait()
